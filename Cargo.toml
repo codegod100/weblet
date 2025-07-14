@@ -12,6 +12,9 @@ rust-embed = "8.3.0"
 wry = "0.35"
 raw-window-handle = "0.6"
 
+[dependencies.iced_tiny_skia]
+git = "https://github.com/pop-os/libcosmic.git"
+
 [dependencies.libcosmic]
 git = "https://github.com/pop-os/libcosmic.git"
 default-features = false

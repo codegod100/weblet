@@ -84,11 +84,11 @@ impl Application for YourApp {
     ///
     /// To get a better sense of which widgets are available, check out the `widget` module.
     fn view(&self) -> Element<Self::Message> {
-        self.core
-            .applet
-            .icon_button("display-symbolic")
-            .on_press(Message::TogglePopup)
-            .into()
+        Element::new(
+            webview_widget::webview::<Self::Message>("data:text/html,<html><body style='margin:0;padding:8px;background:#333;color:white;font-family:sans-serif;font-size:12px;'>WebUI</body></html>")
+                .width(cosmic::iced::Length::Fixed(60.0))
+                .height(cosmic::iced::Length::Fixed(24.0))
+        )
     }
 
     fn view_window(&self, _id: Id) -> Element<Self::Message> {
@@ -99,7 +99,7 @@ impl Application for YourApp {
                 fl!("example-row"),
                 widget::toggler(self.example_row).on_toggle(Message::ToggleExampleRow),
             ))
-            .add(webview_widget::webview("https://example.com").height(cosmic::iced::Length::Fixed(200.0)));
+            .add(widget::text("WebView Placeholder (https://example.com)"));
 
         self.core.applet.popup_container(content_list).into()
     }

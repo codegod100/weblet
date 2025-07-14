@@ -2,15 +2,17 @@ use cosmic::iced::{
     advanced::{
         graphics::core::{Element, Layout, Rectangle, Size},
         layout::{Limits, Node},
-        renderer,
+        renderer::{self, Renderer},
         widget::{Operation, Tree, Widget},
         Shell,
     },
-    mouse, Color, Length, Theme,
+    mouse, Color, Length,
 };
-use iced_tiny_skia;
 use std::sync::{Arc, Mutex};
 use wry::WebView;
+
+// Import the exact renderer type from cosmic's dependency tree
+use iced_tiny_skia;
 
 pub struct WebViewWidget {
     width: Length,
@@ -40,7 +42,7 @@ impl WebViewWidget {
     }
 }
 
-impl<Message> Widget<Message, Theme, iced_tiny_skia::Renderer> for WebViewWidget
+impl<Message> Widget<Message, cosmic::Theme, iced_tiny_skia::Renderer> for WebViewWidget
 {
     fn size(&self) -> Size<Length> {
         Size::new(self.width, self.height)
@@ -59,7 +61,7 @@ impl<Message> Widget<Message, Theme, iced_tiny_skia::Renderer> for WebViewWidget
         &self,
         _tree: &Tree,
         renderer: &mut iced_tiny_skia::Renderer,
-        _theme: &Theme,
+        _theme: &cosmic::Theme,
         _style: &renderer::Style,
         layout: Layout<'_>,
         _cursor: mouse::Cursor,
@@ -107,7 +109,7 @@ impl<Message> Widget<Message, Theme, iced_tiny_skia::Renderer> for WebViewWidget
     }
 }
 
-impl<'a, Message> From<WebViewWidget> for Element<'a, Message, Theme, iced_tiny_skia::Renderer>
+impl<'a, Message> From<WebViewWidget> for Element<'a, Message, cosmic::Theme, iced_tiny_skia::Renderer>
 {
     fn from(widget: WebViewWidget) -> Self {
         Self::new(widget)
