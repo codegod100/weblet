@@ -4,9 +4,14 @@ use cosmic::app::{Core, Task};
 use cosmic::iced::window::Id;
 use cosmic::iced::Limits;
 use cosmic::iced_winit::commands::popup::{destroy_popup, get_popup};
-use cosmic::widget::{self, settings};
+use cosmic::widget::{self, settings, autosize};
 use cosmic::{Application, Element};
+use cosmic::applet::cosmic_panel_config::PanelAnchor;
+use cosmic::widget::Id as WId;
+use std::sync::LazyLock;
 use crate::webview_widget;
+
+static AUTOSIZE_MAIN_ID: LazyLock<WId> = std::sync::LazyLock::new(|| WId::new("autosize-main"));
 
 use crate::fl;
 
@@ -84,11 +89,73 @@ impl Application for YourApp {
     ///
     /// To get a better sense of which widgets are available, check out the `widget` module.
     fn view(&self) -> Element<Self::Message> {
-        Element::new(
-            webview_widget::webview::<Self::Message>("data:text/html,<html><body style='margin:0;padding:8px;background:#333;color:white;font-family:sans-serif;font-size:12px;'>WebUI</body></html>")
-                .width(cosmic::iced::Length::Fixed(60.0))
-                .height(cosmic::iced::Length::Fixed(24.0))
-        )
+        // Create a row of elements like the monitor applet does
+        let webview_content = Element::new(
+            webview_widget::webview::<Self::Message>("data:text/html,<html><body style='margin:0;padding:4px;background:#333;color:white;font-family:sans-serif;font-size:11px;'>CPU: 45%</body></html>")
+                .width(cosmic::iced::Length::Fill)
+                .height(cosmic::iced::Length::Fill)
+        );
+
+        let webview_content2 = Element::new(
+            webview_widget::webview::<Self::Message>("data:text/html,<html><body style='margin:0;padding:4px;background:#333;color:white;font-family:sans-serif;font-size:11px;'>RAM: 2.1GB</body></html>")
+                .width(cosmic::iced::Length::Fill)
+                .height(cosmic::iced::Length::Fill)
+        );
+
+        let webview_content3 = Element::new(
+            webview_widget::webview::<Self::Message>("data:text/html,<html><body style='margin:0;padding:4px;background:#333;color:white;font-family:sans-serif;font-size:11px;'>↓125MB/s</body></html>")
+                .width(cosmic::iced::Length::Fill)
+                .height(cosmic::iced::Length::Fill)
+        );
+
+        // Get suggested padding and spacing
+        let horizontal = matches!(
+            self.core.applet.anchor,
+            PanelAnchor::Top | PanelAnchor::Bottom
+        );
+
+        let theme = cosmic::theme::active();
+        let spacing = theme.cosmic().space_xs();
+
+        // Create a row of widgets like monitor applet
+        let elements: Element<Self::Message> = if horizontal {
+            cosmic::iced::widget::Row::new()
+                .push(webview_content)
+                .push(webview_content2)
+                .push(webview_content3)
+                .spacing(spacing)
+                .align_y(cosmic::iced::Alignment::Center)
+                .into()
+        } else {
+            cosmic::iced::widget::Column::new()
+                .push(webview_content)
+                .push(webview_content2)
+                .push(webview_content3)
+                .spacing(spacing)
+                .align_x(cosmic::iced::Alignment::Center)
+                .into()
+        };
+
+        // Create a button wrapper
+        let button = widget::button::custom(elements)
+            .padding(if horizontal {
+                [0, self.core.applet.suggested_padding(true)]
+            } else {
+                [self.core.applet.suggested_padding(true), 0]
+            })
+            .class(cosmic::theme::Button::AppletIcon)
+            .on_press(Message::TogglePopup);
+
+        // Use autosize with safe limits
+        let limits = Limits::NONE
+            .min_width(1.0)
+            .min_height(1.0)
+            .max_width(800.0) // Reasonable maximum
+            .max_height(200.0); // Reasonable maximum
+
+        autosize::autosize(widget::container(button), AUTOSIZE_MAIN_ID.clone())
+            .limits(limits)
+            .into()
     }
 
     fn view_window(&self, _id: Id) -> Element<Self::Message> {
