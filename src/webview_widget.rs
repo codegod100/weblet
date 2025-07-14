@@ -5,9 +5,11 @@ use cosmic::iced::{
         renderer::{self, Renderer},
         widget::{Operation, Tree, Widget},
         Shell,
+        text,
     },
-    mouse, Color, Length,
+    mouse, Color, Length, Font, Pixels,
 };
+use cosmic::iced_core::text::Renderer as TextRenderer;
 use std::sync::{Arc, Mutex};
 use wry::WebView;
 
@@ -19,6 +21,7 @@ pub struct WebViewWidget {
     height: Length,
     url: String,
     webview: Arc<Mutex<Option<WebView>>>,
+    initialized: Arc<Mutex<bool>>,
 }
 
 impl WebViewWidget {
@@ -28,6 +31,7 @@ impl WebViewWidget {
             height: Length::Fill,
             url: url.into(),
             webview: Arc::new(Mutex::new(None)),
+            initialized: Arc::new(Mutex::new(false)),
         }
     }
 
@@ -67,22 +71,55 @@ impl<Message> Widget<Message, cosmic::Theme, iced_tiny_skia::Renderer> for WebVi
         _cursor: mouse::Cursor,
         _viewport: &Rectangle,
     ) {
-        // Initialize webview if not already done
-        if self.webview.lock().unwrap().is_none() {
-            // This is a simplified approach - in reality you'd need access to the window handle
-            // which requires deeper integration with iced's windowing system
-            // For now, we'll draw a placeholder
-        }
-
-        // Draw placeholder background
+        // For now, let's render HTML-like content using text and shapes
+        // This simulates what the HTML would look like
+        
+        // Draw dark background (simulating the CSS background:#333)
         renderer.fill_quad(
             renderer::Quad {
                 bounds: layout.bounds(),
                 border: Default::default(),
                 shadow: Default::default(),
             },
-            Color::from_rgb(0.2, 0.2, 0.2),
+            Color::from_rgb(0.2, 0.2, 0.2), // #333 background
         );
+
+        // Parse the HTML content and render text
+        let html_content = &self.url;
+        if html_content.starts_with("data:text/html,") {
+            let html = &html_content[15..]; // Remove "data:text/html," prefix
+            
+            // Simple HTML parsing - extract text from <body>
+            if let Some(body_start) = html.find("<body") {
+                if let Some(body_content_start) = html[body_start..].find('>') {
+                    let body_content = &html[body_start + body_content_start + 1..];
+                    if let Some(body_end) = body_content.find("</body>") {
+                        let text_content = &body_content[..body_end];
+                        
+                        // Render the text content
+                        let text_bounds = Rectangle {
+                            x: layout.bounds().x + 8.0, // padding from CSS
+                            y: layout.bounds().y + 8.0,
+                            width: layout.bounds().width - 16.0,
+                            height: layout.bounds().height - 16.0,
+                        };
+                        
+                        // Draw white text (from CSS color:white)
+                        renderer.fill_text(text::Text {
+                            content: text_content.to_string(),
+                            bounds: text_bounds.size(),
+                            size: Pixels(12.0), // font-size:12px from CSS
+                            line_height: text::LineHeight::default(),
+                            font: Font::default(),
+                            horizontal_alignment: cosmic::iced::alignment::Horizontal::Left,
+                            vertical_alignment: cosmic::iced::alignment::Vertical::Top,
+                            shaping: text::Shaping::default(),
+                            wrapping: text::Wrapping::default(),
+                        }, text_bounds.position(), Color::WHITE, text_bounds); // color:white from CSS
+                    }
+                }
+            }
+        }
     }
 
     fn operate(
