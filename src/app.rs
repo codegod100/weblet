@@ -6,6 +6,7 @@ use cosmic::iced::Limits;
 use cosmic::iced_winit::commands::popup::{destroy_popup, get_popup};
 use cosmic::widget::{self, settings};
 use cosmic::{Application, Element};
+use crate::webview_widget;
 
 use crate::fl;
 
@@ -97,7 +98,8 @@ impl Application for YourApp {
             .add(settings::item(
                 fl!("example-row"),
                 widget::toggler(self.example_row).on_toggle(Message::ToggleExampleRow),
-            ));
+            ))
+            .add(webview_widget::webview("https://example.com").height(cosmic::iced::Length::Fixed(200.0)));
 
         self.core.applet.popup_container(content_list).into()
     }
