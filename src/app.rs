@@ -147,11 +147,11 @@ impl Application for YourApp {
             .on_press(Message::TogglePopup);
 
         // Use autosize with safe limits
-        let limits = Limits::NONE
-            .min_width(1.0)
-            .min_height(1.0)
-            .max_width(800.0) // Reasonable maximum
-            .max_height(200.0); // Reasonable maximum
+         let limits = Limits::NONE
+                .max_width(420.0)
+                .min_width(360.0)
+                .min_height(200.0)
+                .max_height(600.0);
 
         autosize::autosize(widget::container(button), AUTOSIZE_MAIN_ID.clone())
             .limits(limits)
