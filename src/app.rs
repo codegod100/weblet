@@ -146,6 +146,15 @@ impl Application for YourApp {
             .class(cosmic::theme::Button::AppletIcon)
             .on_press(Message::TogglePopup);
 
+              let mut limits = Limits::NONE.min_width(1.).min_height(1.);
+        if let Some(b) = self.core.applet.suggested_bounds {
+            if b.width > 0.0 {
+                limits = limits.max_width(b.width);
+            }
+            if b.height > 0.0 {
+                limits = limits.max_height(b.height);
+            }
+        }
         // Use autosize with safe limits
          let limits = Limits::NONE
                 .max_width(420.0)
